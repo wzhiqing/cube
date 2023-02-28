@@ -14,6 +14,7 @@ table HttpQuery {
     query: string;
     trace_obj: string;
     inline_tables: [HttpTable];
+    parameters: [HttpParameter];
 }
 
 table HttpTable {
@@ -35,6 +36,19 @@ table HttpResultSet {
 
 table HttpRow {
     values: [HttpColumnValue];
+}
+
+table UInt64Value { v: uint64; }
+table Int64Value { v: int64; }
+table BoolValue { v: bool; }
+table StringValue { v: string; }
+table BinaryValue { v: [byte]; }
+table Float32Value { v: float32; }
+table Float64Value { v: float64; }
+union HttpParameterValue { UInt64Value, Int64Value, BoolValue, StringValue, BinaryValue, Float32Value, Float64Value }
+
+table HttpParameter {
+    value: HttpParameterValue;
 }
 
 table HttpColumnValue {

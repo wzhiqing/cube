@@ -132,11 +132,20 @@ impl InlineTable {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, Hash, Eq, PartialEq, Debug)]
+pub enum QueryParameter {
+    StringValue(String),
+    BoolValue(String),
+    Int64Value(i64),
+}
+pub type QueryParameters = Vec<QueryParameter>;
+
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct SqlQueryContext {
     pub user: Option<String>,
     pub inline_tables: InlineTables,
     pub trace_obj: Option<String>,
+    pub parameters: Option<QueryParameters>,
 }
 
 impl SqlQueryContext {
@@ -155,6 +164,12 @@ impl SqlQueryContext {
     pub fn with_trace_obj(&self, trace_obj: Option<String>) -> Self {
         let mut res = self.clone();
         res.trace_obj = trace_obj;
+        res
+    }
+
+    pub fn with_parameters(&self, parameters: &Option<QueryParameters>) -> Self {
+        let mut res = self.clone();
+        res.parameters = parameters.clone();
         res
     }
 }

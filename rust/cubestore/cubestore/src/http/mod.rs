@@ -6,12 +6,14 @@ use warp::{Filter, Rejection, Reply};
 
 use crate::codegen::{
     root_as_http_message, HttpColumnValue, HttpColumnValueArgs, HttpError, HttpErrorArgs,
-    HttpMessageArgs, HttpQuery, HttpQueryArgs, HttpResultSet, HttpResultSetArgs, HttpRow,
-    HttpRowArgs,
+    HttpMessageArgs, HttpParameterValue, HttpQuery, HttpQueryArgs, HttpResultSet,
+    HttpResultSetArgs, HttpRow, HttpRowArgs,
 };
 use crate::metastore::{Column, ColumnType, ImportFormat};
 use crate::mysql::SqlAuthService;
-use crate::sql::{InlineTable, InlineTables, SqlQueryContext, SqlService};
+use crate::sql::{
+    InlineTable, InlineTables, QueryParameter, QueryParameters, SqlQueryContext, SqlService,
+};
 use crate::store::DataFrame;
 use crate::table::{Row, TableValue};
 use crate::util::WorkerLoop;
@@ -111,6 +113,7 @@ impl HttpServer {
                         Ok(user) => Ok(SqlQueryContext {
                             user,
                             inline_tables: InlineTables::new(),
+                            parameters: None,
                             trace_obj: None,
                         }),
                         Err(_) => Err(warp::reject::custom(CubeRejection::NotAuthorized)),
@@ -506,12 +509,14 @@ impl HttpServer {
                 query,
                 inline_tables,
                 trace_obj,
+                parameters,
             } => Ok(HttpCommand::ResultSet {
                 data_frame: sql_service
                     .exec_query_with_context(
                         sql_query_context
                             .with_trace_obj(trace_obj)
-                            .with_inline_tables(&inline_tables),
+                            .with_inline_tables(&inline_tables)
+                            .with_parameters(&parameters),
                         &query,
                     )
                     .await?,
@@ -564,6 +569,7 @@ pub enum HttpCommand {
         query: String,
         inline_tables: InlineTables,
         trace_obj: Option<String>,
+        parameters: Option<QueryParameters>,
     },
     ResultSet {
         data_frame: Arc<DataFrame>,
@@ -588,6 +594,7 @@ impl HttpMessage {
                     query,
                     inline_tables,
                     trace_obj,
+                    parameters: _p,
                 } => {
                     let query_offset = builder.create_string(&query);
                     let trace_obj_offset = trace_obj.as_ref().map(|o| builder.create_string(o));
@@ -601,6 +608,8 @@ impl HttpMessage {
                                 query: Some(query_offset),
                                 inline_tables: None,
                                 trace_obj: trace_obj_offset,
+                                // TODO
+                                parameters: None,
                             },
                         )
                         .as_union_value(),
@@ -724,6 +733,7 @@ impl HttpMessage {
             command: match http_message.command_type() {
                 crate::codegen::HttpCommand::HttpQuery => {
                     let query = http_message.command_as_http_query().unwrap();
+
                     let mut inline_tables = Vec::new();
                     if let Some(query_inline_tables) = query.inline_tables() {
                         for inline_table in query_inline_tables.iter() {
@@ -763,10 +773,31 @@ impl HttpMessage {
                             ));
                         }
                     };
+
+                    let parameters = if let Some(http_params) = query.parameters() {
+                        let mut res = Vec::new();
+
+                        for http_param in http_params.iter() {
+                            let value = match http_param.value_type() {
+                                HttpParameterValue::Int64Value => QueryParameter::Int64Value(
+                                    http_param.value_as_int_64_value().unwrap().v(),
+                                ),
+                                _ => panic!("kek"),
+                            };
+
+                            res.push(value);
+                        }
+
+                        Some(res)
+                    } else {
+                        None
+                    };
+
                     HttpCommand::Query {
                         query: query.query().unwrap().to_string(),
-                        inline_tables,
                         trace_obj: query.trace_obj().map(|q| q.to_string()),
+                        inline_tables,
+                        parameters,
                     }
                 }
                 crate::codegen::HttpCommand::HttpResultSet => {
@@ -860,6 +891,7 @@ mod tests {
                 query: "test query".to_string(),
                 inline_tables: vec![],
                 trace_obj: Some("test trace".to_string()),
+                parameters: None,
             },
             connection_id: Some("foo".to_string()),
         };
@@ -928,6 +960,7 @@ mod tests {
                 query: Some(query_offset),
                 inline_tables: Some(inline_tables_offset),
                 trace_obj: None,
+                parameters: None,
             },
         );
         let args = HttpMessageArgs {
@@ -951,7 +984,8 @@ mod tests {
                         "table".to_string(),
                         Arc::new(DataFrame::new(columns, rows.clone()))
                     )],
-                    trace_obj: None
+                    trace_obj: None,
+                    parameters: None
                 },
                 connection_id: Some("foo".to_string()),
             }
@@ -1048,6 +1082,7 @@ mod tests {
                             query: "foo".to_string(),
                             inline_tables: vec![],
                             trace_obj: None,
+                            parameters: None,
                         },
                         connection_id,
                     }
