@@ -460,6 +460,7 @@ describe('Cube Validation', () => {
           shown: true,
           sql: () => 'id',
           type: 'number',
+          subQuery: true,
           primary_key: true,
           propagate_filters_to_sub_query: true
         },

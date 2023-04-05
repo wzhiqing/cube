@@ -31,6 +31,7 @@ const CUBE_MEASURES_ALIAS_MAPPING = {
 const CUBE_DIMENSIONS_ALIAS_MAPPING = {
   primary_key: 'primaryKey',
   propagate_filters_to_sub_query: 'propagateFiltersToSubQuery',
+  sub_query: 'subQuery',
 };
 
 const CUBE_PRE_AGGREGATION_ALIAS_MAPPING = {
