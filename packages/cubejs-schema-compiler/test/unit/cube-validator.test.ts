@@ -439,4 +439,59 @@ describe('Cube Validation', () => {
 
     expect(validationResult.error).toBeFalsy();
   });
+
+  fit('cube - aliases test', async () => {
+    const cubeA = {
+      name: 'CubeA',
+      sql_table: () => 'public.Users',
+      public: true,
+      measures: {
+        id: {
+          sql: () => 'id',
+          type: 'count',
+          rolling_window: {
+            trailing: '1 month',
+          }
+        },
+      },
+      dimensions: {
+        pkey: {
+          shown: true,
+          sql: () => 'id',
+          type: 'number',
+          primaryKey: true
+        },
+        createdAt: {
+          sql: () => 'created',
+          type: 'time',
+        },
+      },
+      pre_aggregations: {
+        main: {
+          type: 'originalSql',
+          time_dimension: () => 'createdAt',
+          partition_granularity: 'day'
+        }
+      },
+      fileName: 'fileName',
+    };
+
+    const cubeSymbols = new CubeSymbols();
+    cubeSymbols.compile([cubeA], {
+      inContext: () => false,
+      error: (message, _e) => {
+        console.log(message);
+      }
+    });
+
+    const cubeValidator = new CubeValidator(cubeSymbols);
+    const validationResult = cubeValidator.validate(cubeSymbols.getCubeDefinition('CubeA'), {
+      inContext: () => false,
+      error: (message, _e) => {
+        console.log(message);
+      }
+    });
+
+    expect(validationResult.error).toBeFalsy();
+  });
 });
