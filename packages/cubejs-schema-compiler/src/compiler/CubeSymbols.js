@@ -18,6 +18,7 @@ const CURRENT_CUBE_CONSTANTS = ['CUBE', 'TABLE'];
 const CUBE_ALIAS_MAPPING = {
   sql_alias: 'sqlAlias',
   sql_table: 'sqlTable',
+  refresh_key: 'refreshKey',
   pre_aggregations: 'preAggregations',
   rewrite_queries: 'rewriteQueries',
   data_source: 'dataSource',
@@ -35,8 +36,15 @@ const CUBE_DIMENSIONS_ALIAS_MAPPING = {
 };
 
 const CUBE_PRE_AGGREGATION_ALIAS_MAPPING = {
-  partition_granularity: 'partitionGranularity',
   time_dimension: 'timeDimension',
+  partition_granularity: 'partitionGranularity',
+  refresh_key: 'refreshKey',
+  allow_non_strict_date_range_match: 'allowNonStrictDateRangeMatch',
+  use_original_sql_preaggregations: 'useOriginalSqlPreAggregations',
+  scheduled_refresh: 'scheduledRefresh',
+  build_range_start: 'buildRangeStart',
+  build_range_end: 'buildRangeEnd',
+  union_with_source_data: 'unionWithSourceData',
 };
 
 export class CubeSymbols {
