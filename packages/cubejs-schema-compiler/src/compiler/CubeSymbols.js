@@ -24,6 +24,7 @@ const CUBE_ALIAS_MAPPING = {
 };
 
 const CUBE_MEASURES_ALIAS_MAPPING = {
+  drill_members: 'drillMembers',
   rolling_window: 'rollingWindow',
 };
 

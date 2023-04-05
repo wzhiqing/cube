@@ -449,6 +449,7 @@ describe('Cube Validation', () => {
         id: {
           sql: () => 'id',
           type: 'count',
+          drill_members: () => ['pkey', 'createdAt'],
           rolling_window: {
             trailing: '1 month',
           }
