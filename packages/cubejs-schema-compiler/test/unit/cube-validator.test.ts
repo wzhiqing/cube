@@ -440,7 +440,7 @@ describe('Cube Validation', () => {
     expect(validationResult.error).toBeFalsy();
   });
 
-  fit('cube - aliases test', async () => {
+  test('cube - aliases test', async () => {
     const cubeA = {
       name: 'CubeA',
       sql_table: () => 'public.Users',
@@ -473,6 +473,8 @@ describe('Cube Validation', () => {
           partition_granularity: 'day'
         }
       },
+      data_source: 'default',
+      rewrite_queries: true,
       fileName: 'fileName',
     };
 

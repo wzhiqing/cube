@@ -17,7 +17,9 @@ const CURRENT_CUBE_CONSTANTS = ['CUBE', 'TABLE'];
 
 const CUBE_ALIAS_MAPPING = {
   sql_table: 'sqlTable',
-  pre_aggregations: 'preAggregations'
+  pre_aggregations: 'preAggregations',
+  rewrite_queries: 'rewriteQueries',
+  data_source: 'dataSource',
 };
 
 const CUBE_MEASURES_ALIAS_MAPPING = {
