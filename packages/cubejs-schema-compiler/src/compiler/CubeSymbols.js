@@ -16,6 +16,7 @@ const CONTEXT_SYMBOLS = {
 const CURRENT_CUBE_CONSTANTS = ['CUBE', 'TABLE'];
 
 const CUBE_ALIAS_MAPPING = {
+  sql_alias: 'sqlAlias',
   sql_table: 'sqlTable',
   pre_aggregations: 'preAggregations',
   rewrite_queries: 'rewriteQueries',

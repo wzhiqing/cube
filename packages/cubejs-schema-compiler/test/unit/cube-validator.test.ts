@@ -475,6 +475,7 @@ describe('Cube Validation', () => {
       },
       data_source: 'default',
       rewrite_queries: true,
+      sql_alias: 'myalias',
       fileName: 'fileName',
     };
 
